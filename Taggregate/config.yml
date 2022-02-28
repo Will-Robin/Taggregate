@@ -1,0 +1,5 @@
+source-files:
+- Source1
+- Source2
+tag-file: FigureTagList.txt
+compiled-directory: output
