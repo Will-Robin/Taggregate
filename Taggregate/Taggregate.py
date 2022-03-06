@@ -60,8 +60,7 @@ def getTagsFromFile(fname):
 
     text = textFromFile(fname)
 
-    # remove header yaml so it does not
-    # interfere in the ordering of tags
+    # remove header yaml so it does not interfere in the ordering of tags
     text = re.sub(header_regex, "", text)
     hits = re.findall(tag_patt, text)
 
@@ -137,8 +136,7 @@ def getTagTextMentions(fname):
     tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
     header_regex = "^---\n([\s\S]+?)---"
 
-    # remove header yaml so it does not
-    # interfere in the ordering of tags
+    # remove header yaml so it does not interfere in the ordering of tags
     text = re.sub(header_regex, "", text)
     # remove image tags
     text = re.sub(image_patt, "", text)
@@ -184,8 +182,7 @@ def getTagsImages(fname):
     image_patt = r"(?s)!\[(.*?)\]\("
     text = textFromFile(fname)
 
-    # remove header yaml so it does not
-    # interfere in the ordering of tags
+    # remove header yaml so it does not interfere in the ordering of tags
     hits = re.findall(image_patt, text)
 
     return hits
@@ -353,8 +350,8 @@ def getHeaderYAML(text):
     header_regex = "^---\n([\s\S]+?)---"
 
     header = re.findall(header_regex, text)
-    # re.findall returns a list. The header
-    # should be the first element of this list.
+    # re.findall returns a list. The header should be the first element of this
+    # list.
     header_yaml = header[0]
 
     return header_yaml
@@ -438,6 +435,7 @@ def readTagFile(fname):
     -------
     new_tags: list
     """
+
     additions = textFromFile(fname)
 
     new_tags = [x for x in additions.split("\n") if x != ""]
