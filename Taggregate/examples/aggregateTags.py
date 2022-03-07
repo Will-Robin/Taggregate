@@ -24,11 +24,11 @@ def main(files, outfile):
     """
 
     # Load the figure tags supplied as ranges
-    ranges = getTagRangesFromFiles(files)
+    ranges = get_tag_ranges_from_files(files)
     # Load the individual tags to figures
-    tags = tagsFromFiles(files, figure_wise=True)
+    tags = tags_from_files(files, figure_wise=True)
     # Add in any missing tags within range references
-    resolved_tags = resolveRanges(tags, ranges)
+    resolved_tags = resolve_ranges(tags, ranges)
 
     # Create a list of the tags for output.
     output_tags = []
@@ -36,9 +36,9 @@ def main(files, outfile):
         output_tags.append(f"{{{r}:m}}")
 
     # Write to file
-    writeTagFile(output_tags, outfile)
+    write_tag_file(output_tags, outfile)
 
 
 if __name__ == "__main__":
-    out = loadConfig("config.yml")
+    out = load_config("config.yml")
     main(out["source-files"], out["tag-file"])

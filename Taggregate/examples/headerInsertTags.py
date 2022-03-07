@@ -12,23 +12,23 @@ tag_field = "manuscript-figures"
 
 
 # Loads the config file which specifies the input and output files
-config = loadConfig("config.yml")
+config = load_config("config.yml")
 
 for f in config["source-files"]:
 
     file = Path(f)
 
     # Load in the text
-    text = textFromFile(f)
+    text = text_from_file(f)
 
     # Get the header yaml so it can be replaced.
-    header_yaml = getHeaderYAML(text)
+    header_yaml = get_header_yaml(text)
 
     # Get the header of the file as a dict
-    header = getHeader(f)
+    header = get_header(f)
 
     # Load tags from the tag file
-    tags = readTagFile(config["tag-file"])
+    tags = read_tag_file(config["tag-file"])
 
     # Insert the tags into the header dict
     header[tag_field] = tags

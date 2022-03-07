@@ -1,29 +1,8 @@
-import os
 import re
 import yaml
-from pathlib import Path
 
 
-def loadConfig(file):
-    """
-    Get various parameters stored in a yaml config file.
-
-    Parameters
-    ----------
-    file: str
-
-    Returns
-    -------
-    header_info: dict
-    """
-
-    text = textFromFile(file)
-    header_info = yaml.load(text, Loader=yaml.FullLoader)
-
-    return header_info
-
-
-def textFromFile(fname):
+def text_from_file(fname):
     """
     Read text from a file.
 
@@ -41,8 +20,26 @@ def textFromFile(fname):
 
     return text
 
+def load_config(file):
+    """
+    Get various parameters stored in a yaml config file.
 
-def getTagsFromFile(fname):
+    Parameters
+    ----------
+    file: str
+
+    Returns
+    -------
+    header_info: dict
+    """
+
+    text = text_from_file(file)
+    header_info = yaml.load(text, Loader=yaml.FullLoader)
+
+    return header_info
+
+
+def get_tags_from_file(fname):
     """
     Read a file as text and find the figure tags within it.
 
@@ -58,7 +55,7 @@ def getTagsFromFile(fname):
     tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
     header_regex = "^---\n([\s\S]+?)---"
 
-    text = textFromFile(fname)
+    text = text_from_file(fname)
 
     # remove header yaml so it does not interfere in the ordering of tags
     text = re.sub(header_regex, "", text)
@@ -67,7 +64,7 @@ def getTagsFromFile(fname):
     return hits
 
 
-def getTagRangesFromFile(fname):
+def get_tag_ranges_from_file(fname):
     """
     Read a file as text and find the figure tags within it.
 
@@ -83,19 +80,19 @@ def getTagRangesFromFile(fname):
     tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
     tag_range_patt = f"{tag_patt}[ ]?-[ ]?[A-Z]?{tag_patt}"
 
-    text = textFromFile(fname)
+    text = text_from_file(fname)
 
     hits = re.findall(tag_range_patt, text)
 
     ranges = []
     for h in hits:
         indiv_tags = re.findall(tag_patt, h)
-        ranges.append([getTagName(tag) for tag in indiv_tags])
+        ranges.append([get_tag_name(tag) for tag in indiv_tags])
 
     return ranges
 
 
-def getTagRangesFromFiles(files):
+def get_tag_ranges_from_files(files):
     """
     Get ranged tag mentions from a group of files.
 
@@ -110,13 +107,13 @@ def getTagRangesFromFiles(files):
 
     ranges = []
     for f in files:
-        rn = getTagRangesFromFile(f)
+        rn = get_tag_ranges_from_file(f)
         ranges.extend(rn)
 
     return ranges
 
 
-def getTagTextMentions(fname):
+def get_tag_text_mentions(fname):
     """
     Get the mentions of figure tags
     outside image captions.
@@ -131,7 +128,7 @@ def getTagTextMentions(fname):
     """
 
     image_patt = r"(?s)!\[(.*?)\]\("
-    text = textFromFile(fname)
+    text = text_from_file(fname)
 
     tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
     header_regex = "^---\n([\s\S]+?)---"
@@ -145,7 +142,7 @@ def getTagTextMentions(fname):
     return hits
 
 
-def getTagsTextMentionsFromFiles(files):
+def get_tags_text_mentions_from_files(files):
     """
     Get the mentions of figure tags outside figure captions ordered by
     appearance in the list of text files.
@@ -161,12 +158,12 @@ def getTagsTextMentionsFromFiles(files):
 
     results = []
     for f in files:
-        results.extend(getTagTextMentions(f))
+        results.extend(get_tag_text_mentions(f))
 
     return results
 
 
-def getTagsImages(fname):
+def get_tags_images(fname):
     """
     Get figure tags from within markdown image fields.
 
@@ -180,7 +177,7 @@ def getTagsImages(fname):
     """
 
     image_patt = r"(?s)!\[(.*?)\]\("
-    text = textFromFile(fname)
+    text = text_from_file(fname)
 
     # remove header yaml so it does not interfere in the ordering of tags
     hits = re.findall(image_patt, text)
@@ -188,7 +185,7 @@ def getTagsImages(fname):
     return hits
 
 
-def imageFieldsFromFiles(files):
+def image_fields_from_files(files):
     """
     Get the contents of image captions in a list of files.
 
@@ -203,12 +200,12 @@ def imageFieldsFromFiles(files):
 
     images = []
     for f in files:
-        images.extend(getTagsImages(f))
+        images.extend(get_tags_images(f))
 
     return images
 
 
-def getTagsFromImageFields(image_fields):
+def get_tags_from_image_fields(image_fields):
     """
     Get the captions from all images tags in a file.
 
@@ -230,7 +227,7 @@ def getTagsFromImageFields(image_fields):
     return all_hits
 
 
-def getTagName(tag):
+def get_tag_name(tag):
     """
     Get the name field of a tag:
 
@@ -252,7 +249,7 @@ def getTagName(tag):
     return name
 
 
-def tagsFromFiles(file_list, figure_wise=False):
+def tags_from_files(file_list, figure_wise=False):
     """
     Get an ordered list of tags from the file list (tags will be ordered in
     order of appearance according to the list of files)
@@ -272,7 +269,7 @@ def tagsFromFiles(file_list, figure_wise=False):
 
     all_hits = []
     for f in file_list:
-        hits = getTagsFromFile(f)
+        hits = get_tags_from_file(f)
         all_hits.extend(hits)
 
     # remove duplicates
@@ -280,7 +277,7 @@ def tagsFromFiles(file_list, figure_wise=False):
     if figure_wise:
         part_of_text_patt = r":(\w)}"
         for a in all_hits:
-            name = getTagName(a)
+            name = get_tag_name(a)
             matches = re.findall(part_of_text_patt, a)
             if name in ordered_tags:
                 pass
@@ -291,7 +288,7 @@ def tagsFromFiles(file_list, figure_wise=False):
 
     else:
         for a in all_hits:
-            name = getTagName(a)
+            name = get_tag_name(a)
             if name in ordered_tags:
                 pass
             else:
@@ -300,7 +297,7 @@ def tagsFromFiles(file_list, figure_wise=False):
     return ordered_tags
 
 
-def resolveRanges(tags, ranges):
+def resolve_ranges(tags, ranges):
     """
     Use tag ranges found to correctly order the tag list.
 
@@ -327,14 +324,13 @@ def resolveRanges(tags, ranges):
                 tags.remove(t)
 
     for c, r in enumerate(ranges):
-        b = tags.index(r[0])
         e = tags.index(r[1])
         tags.insert(e, missing_elements[c])
 
     return tags
 
 
-def getHeaderYAML(text):
+def get_header_yaml(text):
     """
     Get the header YAML from text.
 
@@ -357,7 +353,7 @@ def getHeaderYAML(text):
     return header_yaml
 
 
-def getHeader(fname):
+def get_header(fname):
     """
     Read in a file and return the information in the header YAML as a
     dictionary.
@@ -374,15 +370,15 @@ def getHeader(fname):
     header_info: dict
     """
 
-    text = textFromFile(fname)
-    header_yaml = getHeaderYAML(text)
+    text = text_from_file(fname)
+    header_yaml = get_header_yaml(text)
     # Conversion of YAML to dict
     header_info = yaml.load(header_yaml, Loader=yaml.FullLoader)
 
     return header_info
 
 
-def writeTagFileText(tags, delimiter="\n"):
+def write_tag_file_text(tags, delimiter="\n"):
     """
     Write the text entries for a lit of tags.
 
@@ -404,7 +400,7 @@ def writeTagFileText(tags, delimiter="\n"):
     return text
 
 
-def writeTagFile(tags, fname, delimiter="\n"):
+def write_tag_file(tags, fname, delimiter="\n"):
     """
     Write a list of tags to a file.
 
@@ -417,13 +413,13 @@ def writeTagFile(tags, fname, delimiter="\n"):
     delimiter: str
     """
 
-    text = writeTagFileText(tags, delimiter=delimiter)
+    text = write_tag_file_text(tags, delimiter=delimiter)
 
     with open(fname, "w") as f:
         f.write(text)
 
 
-def readTagFile(fname):
+def read_tag_file(fname):
     """
     Read a list of tags from a file.
 
@@ -436,7 +432,7 @@ def readTagFile(fname):
     new_tags: list
     """
 
-    additions = textFromFile(fname)
+    additions = text_from_file(fname)
 
     new_tags = [x for x in additions.split("\n") if x != ""]
 
