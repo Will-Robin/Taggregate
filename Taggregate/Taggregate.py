@@ -1,6 +1,16 @@
 import re
 import yaml
 
+TAG_PATT = "{#[a-z]:[a-z0-9_-]*:\w}"
+
+TAG_RANGE_PATT = f"{TAG_PATT}[ ]?-[ ]?[A-Z]?{TAG_PATT}"
+
+HEADER_REGEX = "^---\n([\s\S]+?)---"
+
+IMAGE_PATT = r"(?s)!\[(.*?)\]\("
+
+NAME_REGEX = r"#[a-z]:[a-z0-9_-]*"
+
 
 def text_from_file(fname):
     """
@@ -19,6 +29,7 @@ def text_from_file(fname):
         text = f.read()
 
     return text
+
 
 def load_config(file):
     """
@@ -52,14 +63,11 @@ def get_tags_from_file(fname):
     hits: list
     """
 
-    tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
-    header_regex = "^---\n([\s\S]+?)---"
-
     text = text_from_file(fname)
 
     # remove header yaml so it does not interfere in the ordering of tags
-    text = re.sub(header_regex, "", text)
-    hits = re.findall(tag_patt, text)
+    text = re.sub(HEADER_REGEX, "", text)
+    hits = re.findall(TAG_PATT, text)
 
     return hits
 
@@ -77,16 +85,13 @@ def get_tag_ranges_from_file(fname):
     ranges: list of lists
     """
 
-    tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
-    tag_range_patt = f"{tag_patt}[ ]?-[ ]?[A-Z]?{tag_patt}"
-
     text = text_from_file(fname)
 
-    hits = re.findall(tag_range_patt, text)
+    hits = re.findall(TAG_RANGE_PATT, text)
 
     ranges = []
     for h in hits:
-        indiv_tags = re.findall(tag_patt, h)
+        indiv_tags = re.findall(TAG_PATT, h)
         ranges.append([get_tag_name(tag) for tag in indiv_tags])
 
     return ranges
@@ -127,17 +132,13 @@ def get_tag_text_mentions(fname):
     hits: list
     """
 
-    image_patt = r"(?s)!\[(.*?)\]\("
     text = text_from_file(fname)
 
-    tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
-    header_regex = "^---\n([\s\S]+?)---"
-
     # remove header yaml so it does not interfere in the ordering of tags
-    text = re.sub(header_regex, "", text)
+    text = re.sub(HEADER_REGEX, "", text)
     # remove image tags
-    text = re.sub(image_patt, "", text)
-    hits = re.findall(tag_patt, text)
+    text = re.sub(IMAGE_PATT, "", text)
+    hits = re.findall(TAG_PATT, text)
 
     return hits
 
@@ -176,11 +177,10 @@ def get_tags_images(fname):
     hits: list
     """
 
-    image_patt = r"(?s)!\[(.*?)\]\("
     text = text_from_file(fname)
 
     # remove header yaml so it does not interfere in the ordering of tags
-    hits = re.findall(image_patt, text)
+    hits = re.findall(IMAGE_PATT, text)
 
     return hits
 
@@ -218,10 +218,9 @@ def get_tags_from_image_fields(image_fields):
     all_hits: list
     """
 
-    tag_patt = "{#[a-z]:[a-z0-9_-]*:\w}"
     all_hits = []
     for i in image_fields:
-        hits = re.findall(tag_patt, i)
+        hits = re.findall(TAG_PATT, i)
         all_hits.extend(hits)
 
     return all_hits
@@ -242,9 +241,7 @@ def get_tag_name(tag):
     name: str
     """
 
-    name_regex = r"#[a-z]:[a-z0-9_-]*"
-
-    name = re.findall(name_regex, tag)[0]
+    name = re.findall(NAME_REGEX, tag)[0]
 
     return name
 
@@ -343,9 +340,7 @@ def get_header_yaml(text):
     header_yaml: str
     """
 
-    header_regex = "^---\n([\s\S]+?)---"
-
-    header = re.findall(header_regex, text)
+    header = re.findall(HEADER_REGEX, text)
     # re.findall returns a list. The header should be the first element of this
     # list.
     header_yaml = header[0]
